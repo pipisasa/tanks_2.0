@@ -1,0 +1,12 @@
+@font-face{
+    font-family: 'arcade';
+    src: url("../fonts/ARCADECLASSIC.TTF");
+}
+
+body{
+    background-color: black;
+}
+
+/* .col {
+    display: flex;
+}; */
