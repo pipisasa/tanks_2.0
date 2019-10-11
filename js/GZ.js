@@ -51,7 +51,10 @@ let Col = function(x, y){
         height:`${bs}px`,
         'background-color': 'black',
         'display':'flex',
-        'box-shadow': '0 0 0 1px #7b7b7b'
+        'box-shadow': '0 0 0 1px #7b7b7b',
+        'flex-direction': 'column',
+        'justify-content': 'center',
+        'align-items': 'center'
     })
     $(`#y${y}`).append(this.element);
 };

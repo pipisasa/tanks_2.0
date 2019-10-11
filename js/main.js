@@ -43,3 +43,9 @@ $('body').keydown(function(event){
         }
     }
 });
+
+$('body').keyup(function(event){
+    if(event.keyCode == 32){
+        tanks.red.fire();
+    }
+})

@@ -7,6 +7,13 @@ body{
     background-color: black;
 }
 
+#red_scoreboard{
+    right:0;
+}
+
+#blue_scoreboard{
+    left:0;
+}
 /* .col {
     display: flex;
 }; */
