@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
     <script src="./js/GZ.js"></script>
     <script src="./js/tank.js"></script>
+    <script src="./js/main.js"></script>
     <link rel="stylesheet" href="./css/main.css">
 </head>
 
@@ -38,13 +39,11 @@
             [0,0,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,1,0,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        ]
+        ];
         gamingZone.binaryMap(map);
         
-        let red = new Tank(4,3,'red');
-        let blue = new Tank(10,3,'blue');
-        
+        let red = new Tank(5,7,'red');
+        let blue = new Tank(11,7,'blue');
     </script>
-    <script src="./js/main.js"></script>
 </body>
 </html>

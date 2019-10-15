@@ -72,19 +72,15 @@ GZ.prototype.binaryMap = function(arr){
     }
 }
 
-GZ.prototype.gameOver = function(){
-    let GOElem = $(`
-    <div style="
-    top: 30%;
-    left: 23%;
-    position: absolute;
-    color: white;
-    font-family: arcade;
-    font-size: 500%;">
-        <h1 style="margin:0;">GAME OVER</h1>
-        <h6 style="margin: 0 0 0 30%;">${winner}'s WIN!!!<h6>
-    </div>`)
-    $('.GZ').append(GOElem);
+GZ.prototype.setFuel = function(){
+    for(let i=true; i; i){
+        let x = Math.floor(Math.random()*widthInBck);
+        let y = Math.floor(Math.random()*heightInBck);
+        if(map[y][x]==0){
+            i = !i;
+            $(`#x${x}y${y}`).addClass('fuel').css('background','url(./img/fuel.png) 0% 0% / contain no-repeat')
+        }
+    }
 }
 
-let winner = 'Red'
+// GZ.prototype.

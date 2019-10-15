@@ -8,9 +8,11 @@ let Tank = function(x, y, type){
     tanks[type] = this;
     this.dir='down';
     this.setDirBool = true;
-    this.speed = 200;
+    this.speed = 150;
     this.speedBool = true;
     this.armory=100;
+    this.fuel = 100;
+    this.hp = 20;
     this.gunLvL=1;
     this.bullets = [];
     this.element = $(`<div class="tank" id="${type}"></div>`);
@@ -33,8 +35,9 @@ let Tank = function(x, y, type){
             text-align: center;
             font-size: 200%;
             background-color: ${type};">${type}</div>
-            <div class="fuelBoard" id="${type}Fuel">Fuel:${this.fuel}</div>
-            <div class="armoryBoard" id="${type}Armory">Armory:${this.armory}</div>
+                <div class="hpBoard" id="${type}Hp">HP:${this.hp}</div>
+                <div class="fuelBoard" id="${type}Fuel">Fuel:${this.fuel}</div>
+                <div class="armoryBoard" id="${type}Armory">Armory:${this.armory}</div>
         </div>`));
     
     if(type=='red'){
@@ -50,27 +53,35 @@ let Tank = function(x, y, type){
 
     this.moveTo = {
         up: ()=>{
-            if(gz.map[this.y-1].arr[this.x].type!='wall' && $(`#x${this.x}y${this.y-1}`).children().length==0){
+            if(gz.map[this.y-1].arr[this.x].type!='wall' && $(`#x${this.x}y${this.y-1}`).children().length==0 && this.fuel>0){
                 this.y--;
                 this.draw();
+                this.fuel--;
+                $(`#${this.type}Fuel`).text(`Fuel:${this.fuel}`)
             }
         },
         down: ()=>{
-            if(gz.map[this.y+1].arr[this.x].type!='wall' && $(`#x${this.x}y${this.y+1}`).children().length==0){
+            if(gz.map[this.y+1].arr[this.x].type!='wall' && $(`#x${this.x}y${this.y+1}`).children().length==0 && this.fuel>0){
                 this.y++;
                 this.draw();
+                this.fuel--;
+                $(`#${this.type}Fuel`).text(`Fuel:${this.fuel}`)
             }
         },
         left: ()=>{
-            if(gz.map[this.y].arr[this.x-1].type!='wall' && $(`#x${this.x-1}y${this.y}`).children().length==0){
+            if(gz.map[this.y].arr[this.x-1].type!='wall' && $(`#x${this.x-1}y${this.y}`).children().length==0 && this.fuel>0){
                 this.x--;
                 this.draw();
+                this.fuel--;
+                $(`#${this.type}Fuel`).text(`Fuel:${this.fuel}`)
             }
         },
         right: ()=>{
-            if(gz.map[this.y].arr[this.x+1].type!='wall' && $(`#x${this.x+1}y${this.y}`).children().length==0){
+            if(gz.map[this.y].arr[this.x+1].type!='wall' && $(`#x${this.x+1}y${this.y}`).children().length==0 && this.fuel>0){
                 this.x++;
                 this.draw();
+                this.fuel--;
+                $(`#${this.type}Fuel`).text(`Fuel:${this.fuel}`)
             }
         }
     };
@@ -85,10 +96,51 @@ Tank.prototype.setDir = function(dir){
     };
     this.dir=dir;
     this.element.css('transform',dirs[dir]);
-    setTimeout(() => {
+    
         this.setDirBool=true;
-    }, 50);
+    
 };
+
+Tank.prototype.hit = function(){
+    this.hp--;
+    $(`#${this.type}Hp`).text(`HP:${this.hp}`);
+    if(this.hp<=0){
+        gameOver(this.type);
+    }
+};
+
+
+let gameOver = function(loser){
+    let winner = loser=='red' ? 'blue':'red';
+    let GOElem = $(`
+    <div style="
+    height: 22vw;
+    top: 30%;
+    left: 10%;
+    background-color: black;
+    position: absolute;
+    color: white;
+    font-family: arcade;
+    font-size: 500%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    box-shadow: 0 0 0 2px white;">
+        <div style="font-size: 17vw;">GAME OVER</div>
+        <div style="
+        text-align: center;
+        font-size: 2vw;
+        width: 40vw;
+        background: black;
+        /* margin: 0 0 0 0%; */
+        box-shadow: 0 0 0 1px white;"><div style="
+        display: inline-block;
+        color: ${winner};">${winner}</div>'s WIN!!!</div>
+    </div>`)
+    $('body').append(GOElem);
+};
+
 //////////////////////////////////////grgrgusofiyhior ytuhvohoihiszoeij
 Tank.prototype.fire = function(){
     let dirs = {
@@ -99,9 +151,9 @@ Tank.prototype.fire = function(){
     }
     if(this.armory>0){
         this.armory-=this.gunLvL;
-        $(`#${this.type}Armory`).text(`Armory:${this.armory}`)
-        // console.log(dirs[this.dir])
-        this.bullets.push(new Bullet(dirs[this.dir],this.dir))
+        $(`#${this.type}Armory`).text(`Armory:${this.armory}`);
+        // console.log(dirs[this.dir]);
+        this.bullets.push(new Bullet(dirs[this.dir],this.dir));
     }
 };
 
@@ -110,27 +162,44 @@ let deleteBullet = function(bullet){
     setTimeout(function(){
         bullet.element.detach();
     },100)
-    delete bullet;
 }
 
 let Bullet = function(position, dir){
-    let th = this;
+    let dirs = {
+        up:    ()=>{this.y--},
+        down:  ()=>{this.y++},
+        left:  ()=>{this.x--},
+        right: ()=>{this.x++},
+    }
     this.move = function(){
-        if(this.dir=='up' && (this.y==0 || gz.map[this.y-1].arr[this.x].type == 'wall') || this.dir=='down' && (this.y==heightInBck-1 || gz.map[this.y+1].arr[this.x].type == 'wall') || this.dir=='left' && (this.x==0 || gz.map[this.y].arr[this.x-1].type == 'wall') || this.dir=='right' && (this.x == widthInBck-1 || gz.map[this.y].arr[this.x+1].type == 'wall')){
+        $(`#x${this.x}y${this.y}`).append(this.element);
+
+        if(this.dir=='up' && (this.y<=0 || gz.map[this.y-1].arr[this.x].type == 'wall') || this.dir=='down' && (this.y>=heightInBck-1 || gz.map[this.y+1].arr[this.x].type == 'wall') || this.dir=='left' && (this.x<=0 || gz.map[this.y].arr[this.x-1].type == 'wall') || this.dir=='right' && (this.x >= widthInBck-1 || gz.map[this.y].arr[this.x+1].type == 'wall')){
             // console.log(this)
             deleteBullet(this)
             return;
         }
-        let dirs = {
-            up:    ()=>{this.y--},
-            down:  ()=>{this.y++},
-            left:  ()=>{this.x--},
-            right: ()=>{this.x++},
+        
+        
+        
+        if(this.x==tanks.red.x && this.y==tanks.red.y){
+            this.element.detach();
+            // deleteBullet(this)
+            clearInterval(this.id);
+            tanks.red.hit();
+            return;
+        }
+        
+        if(this.x==tanks.blue.x && this.y==tanks.blue.y){
+            this.element.detach();
+            clearInterval(this.id);
+            // deleteBullet(this);
+            tanks.blue.hit();
+            return;
         }
         dirs[this.dir]();
-        $(`#x${this.x}y${this.y}`).append(this.element);
     }
-
+    
     this.setDir = function(dir){
         let dirs = {
             'up':    'rotate(360deg)',
@@ -141,7 +210,7 @@ let Bullet = function(position, dir){
         this.element.css('transform',dirs[dir]);
     }
     this.dir = dir;
-    this.speed = 200;
+    this.speed = 100;
     this.x = position[0];
     this.y = position[1];
     this.element = $(`<div class="bullet"></div>`);
@@ -151,71 +220,10 @@ let Bullet = function(position, dir){
         height: bs/2 + "px"
     });
     this.setDir(dir);
-    this.move();
+    // this.move();
+    dirs[this.dir]();
+    // $(`#x${this.x}y${this.y}`).append(this.element);
     this.id = setInterval(()=>{
         this.move();
     },this.speed)
 }
-
-/*Tank.prototype.fire = function(){
-    if(this.bulletSpeedBool && !this.armory<=0){
-        this.armory-=this.gunLvL;
-        bullets.push(new Bullet);
-        bullets[bullets.length-1].draw();
-        console.log(this.armory)
-        this.bulletSpeedBool = false;
-        setBulletSpeed(this);
-    }
-};
-
-class Bullet{constructor(){
-    this.dir = t34.direction;
-    this.col = t34.block.col;
-    this.row = t34.block.row;
-}};
-
-Bullet.prototype.draw = function(){
-    if(this.moveBullet()){
-        console.log(1)
-        return};
-    ctx.fillStyle = 'black';
-    ctx.fillRect(blockSize*this.col+blockSize*0.4,blockSize*this.row+blockSize*0.4,blockSize*0.2,blockSize*0.2)
-}
-
-Bullet.prototype.moveBullet = function(){
-    if(this.dir=='up' && this.row>1){
-        this.row--;
-    }else if(this.dir=='down' && this.row<height/blockSize-2){
-        this.row++;
-    }else if(this.dir=='left' && this.col>1){
-        this.col--;
-    }else if(this.dir=='right' && this.col<width/blockSize-2){
-        this.col++;
-    }else{
-        this.col=-1;
-        this.row=-1;
-        return true;
-    }
-    for(let i=0; i<walls.length; i++){
-        if(this.col === walls[i].col && this.row === walls[i].row){
-            this.col=-1;
-            this.row=-1;
-            walls[i].hit(t34.gunLvL);
-        }
-    }
-
-    ctx.fillStyle = 'black';
-    ctx.fillRect(blockSize*this.col+blockSize*0.4,blockSize*this.row+blockSize*0.4,blockSize*0.2,blockSize*0.2);
-};
-
-Tank.prototype.bulletSpeedBool = true;
-Tank.prototype.bulletSpeed = 500;
-
-let setBulletSpeed = function(tank){
-    setTimeout(function(){
-        tank.bulletSpeedBool = true;
-        // clearTimeout(tankObj.bulletSpeedId);
-        // setBulletSpeed();
-    },tank.bulletSpeed/tank.gunLvL);
-};
-*/
